@@ -46,8 +46,8 @@ public class Asm {
             String line = "";
 
             Pattern labelPattern = Pattern.compile(
-                "[a-zA-Z]([0-9a-zA-Z])*:");
-            Pattern pseudoPattern = Pattern.compile(".[a-zA-Z]+");
+                "[a-zA-Z]([0-9a-zA-Z])*:"); // matches a label
+            Pattern pseudoPattern = Pattern.compile(".[a-zA-Z]+");  // matches a psuedo-op
             Matcher labelMatcher;
             Matcher pseudoMatcher;
             int curAddr = 0x00000000;
@@ -58,6 +58,7 @@ public class Asm {
                 if (reader.hasNext()) {
                     curWord = reader.next();
 
+                    // check for comments - ignore the whole line if ; found
                     if (!Pattern.compile(";.*").matcher(curWord).matches()) {
                         labelMatcher = labelPattern.matcher(curWord);
                         pseudoMatcher = pseudoPattern.matcher(curWord);
@@ -68,6 +69,9 @@ public class Asm {
                         } else if (pseudoMatcher.matches()) {
                             // found a pseudo-op
                             String op = curWord.substring(1);
+                            /*
+                             * .ORG - set current address equal to given value
+                             */
                             if (op.equals("ORG") || op.equals("ORIG")
                              || op.equals("org") || op.equals("orig")) {
                                 if (!reader.hasNext()) {
@@ -76,6 +80,12 @@ public class Asm {
                                 }
                                 curWord = reader.next();
                                 curAddr = Integer.parseInt(curWord.substring(2), 16);
+                            /*
+                             * .NAME - create a constant with the given name and
+                             *         value
+                             * in 2nd pass, any instance of a constant name
+                             * will be replaced with its value
+                             */
                             } else if (op.equals("NAME") || op.equals("name")) {
                                 if (!reader.hasNext()) {
                                     System.out.println(".NAME requires a name");
@@ -88,7 +98,10 @@ public class Asm {
                                 }
                                 constants.put(curWord,
                                     Integer.parseInt(reader.next().substring(2), 16));
-                            } else if (op.equals("WORD") || op.equals("name")) {
+                            /*
+                             * .WORD - store given value at current address
+                             */
+                            } else if (op.equals("WORD") || op.equals("word")) {
                                 if (!reader.hasNext()) {
                                     System.out.println(".WORD requires a value");
                                     return;
