@@ -1,0 +1,15 @@
+label:
+GetStuff:
+line four
+line	five 	 with   some tabs       and 			spaces
+	; line 6
+ ; line 7
+   .ORG		0xffd800
+.NAME	val	0x8008B5
+moreStuff2:
+		.WORD 0xfffffff
+		edfs
+	asdad
+ sdfsd
+  asds
+.word 0xA55A55
